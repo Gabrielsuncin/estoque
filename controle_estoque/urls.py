@@ -15,9 +15,10 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from .views import principal
+from .views import principal, generate_barcode
 
 urlpatterns = [
-    path('', principal),
+    path('', principal, name='principal'),
+    path('barcode/', generate_barcode, name="barcode")
 
 ]
