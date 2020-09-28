@@ -11,7 +11,7 @@ def principal(request):
 
 def generate_barcode(request):
     '''
-    TODO Criar essa função recebendo o número após ser checado no DB se o mesmo não existe
+    //TODO Criar essa função recebendo o número após ser checado no DB se o mesmo não existe
     Se não encontrar esse code_id no DB atribui o code_id ao produto
     Exemplo:
     obj = get_object_or_404(MyModel, pk=code_id)
@@ -22,3 +22,7 @@ def generate_barcode(request):
     ean.save(code_id)
     # return HttpResponse('Código de barras criado com sucesso!')
     return redirect('principal')
+
+
+# //TODO A VIEW DE VENDAS DEVERÁ RETORNAR O PRODUTO E O PREÇO DO DB QUANDO FOR INSERIDO O CÓDIGO DO MESMO
+# //TODO CRIAR TABELA

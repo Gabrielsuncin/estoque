@@ -1,16 +1,16 @@
 from django.db import models
 
-
 ESTADOS_CHOICES = (
-        ('SP', 'SP'),
-        ('RJ', 'RJ'),
-        ('SC', 'SC'),
-        ('MG', 'MG'),
-        ('MS', 'MS'),
-    )
+    ('SP', 'SP'),
+    ('RJ', 'RJ'),
+    ('SC', 'SC'),
+    ('MG', 'MG'),
+    ('MS', 'MS'),
+)
 
 
 class Fornecedor(models.Model):
+    """ //TODO FALTA CAMPO E-MAIL """
     nome_empresa = models.CharField(max_length=150, null=False, blank=False)
     cnpj = models.CharField(max_length=15, null=False, blank=False)
     telefone = models.CharField(max_length=11, null=False, blank=False)
@@ -20,7 +20,6 @@ class Fornecedor(models.Model):
     updated_at = models.DateField('Atualizado em', auto_now=True)
     estado = models.CharField(max_length=100, choices=ESTADOS_CHOICES, default='SP')
     ativo = models.BooleanField(default=True)
-
 
     def __str__(self):
         return self.nome_empresa
@@ -32,6 +31,7 @@ class Fornecedor(models.Model):
 
 
 class Funcionario(models.Model):
+    """ //TODO FALTA CAMPO E-MAIL """
     funcionario = models.CharField(max_length=150, null=False, blank=False)
     cargo_funcionario = models.CharField(max_length=150, null=False, blank=False)
     estado = models.CharField(max_length=100, choices=ESTADOS_CHOICES)
@@ -52,5 +52,6 @@ class Funcionario(models.Model):
         verbose_name_plural = 'Funcionários'
         ordering = ['funcionario']
 
-
-
+# //TODO CRIAR TABELA DE COMPRAS, VENDAS, PRODUTOS, PEDIDOS, HISTÓRICO DE COMPRAS E ATUALIZAÇÃO DE PREÇOS
+# //TODO CRIAR TAMBÉM UMA TABELA COM OS PRODUTOS QUE ATINGIREM O ESTOQUE MÍNIMO PARA NOVA COMPRA CONTENDO DATA DE
+#  CRIAÇÃO, PEDIDO ENVIADO?, DATA DO PEDIDO, QUANTIDADE, VALOR, VALOR TOTAL, FORNCEDOR, DATA PREVISTA DE RECEBIMENTO
