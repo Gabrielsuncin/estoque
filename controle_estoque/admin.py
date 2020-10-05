@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Fornecedor, Funcionario
+from .models import Fornecedor, Funcionario, Genero, Categoria, Subcategoria
 
 # Register your models here.
 
@@ -18,5 +18,26 @@ class FuncionarioAdmin(admin.ModelAdmin):
     list_filter = ['funcionario', 'cargo_funcionario', 'data_admissao', 'estado', 'ativo', ]
 
 
+class GeneroAdmin(admin.ModelAdmin):
+    list_display = ['id', 'genero', ]
+    search_fields = ['id', 'genero', ]
+    list_filter = ['id', 'genero', ]
+
+
+class CategoriaAdmin(admin.ModelAdmin):
+    list_display = ['id', 'categoria', ]
+    search_fields = ['id', 'categoria', ]
+    list_filter = ['id', 'categoria', ]
+
+
+class SubcategoriaAdmin(admin.ModelAdmin):
+    list_display = ['id', 'subcategoria', ]
+    search_fields = ['id', 'subcategoria', ]
+    list_filter = ['id', 'subcategoria', ]
+
+
 admin.site.register(Fornecedor, FornecedorAdmin)
 admin.site.register(Funcionario, FuncionarioAdmin)
+admin.site.register(Genero, GeneroAdmin)
+admin.site.register(Categoria, CategoriaAdmin)
+admin.site.register(Subcategoria, SubcategoriaAdmin)

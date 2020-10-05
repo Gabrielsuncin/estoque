@@ -52,8 +52,38 @@ class Funcionario(models.Model):
         verbose_name_plural = 'Funcionários'
         ordering = ['funcionario']
 
-# //TODO CRIAR TABELA DE COMPRAS, VENDAS, PRODUTOS, PEDIDOS
-# //TODO CRIAR TABELAS COM HISTÓRICO DE COMPRAS E ATUALIZAÇÃO DE PREÇOS
-# //TODO CRIAR TAMBÉM UMA TABELA COM OS PRODUTOS QUE ATINGIREM 70% DO ESTOQUE MÍNIMO PARA NOVA COMPRA
-# //TODO A TABELA DE PEDIDO DEVERÁ CONTER DATA DE CRIAÇÃO, PEDIDO ENVIADO?, DATA DO PEDIDO, QUANTIDADE, VALOR,
-#  VALOR TOTAL, FORNCEDOR, DATA PREVISTA DE RECEBIMENTO
+
+class Genero(models.Model):
+    genero = models.CharField(max_length=15)
+
+    def __str__(self):
+        return f'{self.genero}'
+
+    class Meta:
+        verbose_name = 'Gênero'
+        verbose_name_plural = 'Gêneros'
+        ordering = ['genero']
+
+
+class Categoria(models.Model):
+    categoria = models.CharField(max_length=30)
+
+    def __str__(self):
+        return f'{self.categoria}'
+
+    class Meta:
+        verbose_name = 'Categoria'
+        verbose_name_plural = 'Categorias'
+        ordering = ['categoria']
+
+
+class Subcategoria(models.Model):
+    subcategoria = models.CharField(max_length=30)
+
+    def __str__(self):
+        return f'{self.subcategoria}'
+
+    class Meta:
+        verbose_name = 'Subcategoria'
+        verbose_name_plural = 'Subcategorias'
+        ordering = ['subcategoria']
