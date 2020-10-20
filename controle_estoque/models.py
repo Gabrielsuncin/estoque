@@ -43,6 +43,8 @@ class Funcionario(models.Model):
     data_admissao = models.DateField('Criado em', auto_now_add=True)
     data_demissao = models.DateField('Demitido em', auto_now_add=True)
     ativo = models.BooleanField(default=True)
+    created_at = models.DateField('Criado em', auto_now_add=True)
+    updated_at = models.DateField('Atualizado em', auto_now=True)
 
     def __str__(self):
         return f'{self.funcionario}, {self.cargo_funcionario}'
@@ -55,6 +57,8 @@ class Funcionario(models.Model):
 
 class Genero(models.Model):
     genero = models.CharField(max_length=15)
+    created_at = models.DateField('Criado em', auto_now_add=True)
+    updated_at = models.DateField('Atualizado em', auto_now=True)
 
     def __str__(self):
         return f'{self.genero}'
@@ -67,6 +71,8 @@ class Genero(models.Model):
 
 class Categoria(models.Model):
     categoria = models.CharField(max_length=30)
+    created_at = models.DateField('Criado em', auto_now_add=True)
+    updated_at = models.DateField('Atualizado em', auto_now=True)
 
     def __str__(self):
         return f'{self.categoria}'
@@ -79,6 +85,8 @@ class Categoria(models.Model):
 
 class Subcategoria(models.Model):
     subcategoria = models.CharField(max_length=30)
+    created_at = models.DateField('Criado em', auto_now_add=True)
+    updated_at = models.DateField('Atualizado em', auto_now=True)
 
     def __str__(self):
         return f'{self.subcategoria}'
@@ -87,3 +95,37 @@ class Subcategoria(models.Model):
         verbose_name = 'Subcategoria'
         verbose_name_plural = 'Subcategorias'
         ordering = ['subcategoria']
+
+
+
+class Produto(models.Model):
+    nome = models.CharField(max_length=30)
+    descricao = models.CharField(max_length=50)
+    genero = models.ForeignKey(Genero, on_delete=models.CASCADE)
+    categoria = models.ForeignKey(Categoria, on_delete=models.CASCADE)
+    subcategoria = models.ForeignKey(Subcategoria, on_delete=models.CASCADE)
+    tamanho = models.CharField(max_length=10)
+    cor = models.CharField(max_length=30)
+    grade = models.CharField(max_length=30)
+    min_pecas = models.PositiveSmallIntegerField()
+    alerta_min = models.PositiveSmallIntegerField()
+    total_pecas = models.PositiveSmallIntegerField()
+    preco_compra = models.DecimalField(max_digits=6, decimal_places=2)
+    preco_venda = models.DecimalField(max_digits=6, decimal_places=2)
+    ean = models.CharField(max_length=15)
+    sku = models.CharField(max_length=10)
+    fornecedor = models.ForeignKey(Fornecedor, on_delete=models.CASCADE)
+    created_at = models.DateField('Criado em', auto_now_add=True)
+    updated_at = models.DateField('Atualizado em', auto_now=True)
+
+    def __str__(self):
+        return f'{self.nome}'
+
+    class Meta:
+        verbose_name = 'Produto'
+        verbose_name_plural = 'Produtos'
+        ordering = ['nome']
+
+        db_table = 'produto'
+
+# //TODO VER CAMPOS NULL
