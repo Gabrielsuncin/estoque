@@ -29,6 +29,8 @@ class Fornecedor(models.Model):
         verbose_name_plural = 'Fornecedores'
         ordering = ['nome_empresa']
 
+        db_table = 'fornecedor'
+
 
 class Funcionario(models.Model):
     funcionario = models.CharField(max_length=150)
@@ -54,6 +56,8 @@ class Funcionario(models.Model):
         verbose_name_plural = 'Funcionários'
         ordering = ['funcionario']
 
+        db_table = 'funcionario'
+
 
 class Genero(models.Model):
     genero = models.CharField(max_length=15)
@@ -68,6 +72,7 @@ class Genero(models.Model):
         verbose_name_plural = 'Gêneros'
         ordering = ['genero']
 
+        db_table = 'genero'
 
 class Categoria(models.Model):
     categoria = models.CharField(max_length=30)
@@ -81,6 +86,8 @@ class Categoria(models.Model):
         verbose_name = 'Categoria'
         verbose_name_plural = 'Categorias'
         ordering = ['categoria']
+
+        db_table = 'categoria'
 
 
 class Subcategoria(models.Model):
@@ -96,6 +103,7 @@ class Subcategoria(models.Model):
         verbose_name_plural = 'Subcategorias'
         ordering = ['subcategoria']
 
+        db_table = 'subcategoria'
 
 
 class Produto(models.Model):
