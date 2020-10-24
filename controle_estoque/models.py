@@ -127,5 +127,3 @@ class Produto(models.Model):
         ordering = ['nome']
 
         db_table = 'produto'
-
-# //TODO VER CAMPOS NULL
