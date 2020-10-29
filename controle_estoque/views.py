@@ -1,9 +1,11 @@
 import logging
+import os
+from pathlib import Path
+
 from django.conf import settings
 from django.core import mail
-from django.core.mail import EmailMessage
 from django.http import HttpResponse
-from django.shortcuts import render, redirect
+from django.shortcuts import render
 from random import randint
 import barcode
 
@@ -15,7 +17,7 @@ def principal(request):
     return render(request, 'principal.html')
 
 
-def generate_barcode(request):
+def generate_barcode(self):
     '''
     //TODO Criar essa função recebendo o número após ser checado no DB se o mesmo não existe
     Se não encontrar esse code_id no DB atribui o code_id ao produto
@@ -23,12 +25,11 @@ def generate_barcode(request):
     obj = get_object_or_404(MyModel, pk=code_id)
     Se já existir gera outro code_id
     '''
-    code_id = str(randint(100000000000, 999999999999))
-    ean = barcode.get('ean13', code_id)
-    ean.save(code_id)
-    logger.error(f"Arquivo '{code_id}.svg' criado com o barcode {code_id}")
-    return HttpResponse('Código de barras criado com sucesso!')
-    # return redirect('principal')
+    code_id = str(randint(7890000000000, 7899999999999))
+    ean_number = barcode.get('ean13', code_id)
+    barcodes_folder = Path(__file__).resolve().parent / "barcodes"
+    ean_number.save(os.path.join(barcodes_folder, code_id))
+    return HttpResponse(f'Código de barras {ean_number} criado com sucesso!')
 
 
 def send_email_logs(request):
@@ -72,4 +73,3 @@ def send_email_logs(request):
 
 
 # //TODO A VIEW DE VENDAS DEVERÁ RETORNAR O PRODUTO E O PREÇO DO DB QUANDO FOR INSERIDO O CÓDIGO DO MESMO
-# //TODO NA TABELA DE PRODUTOS COLOCAR PREÇO VAREJO E ATACADO
