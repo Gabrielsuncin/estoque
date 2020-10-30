@@ -2,10 +2,11 @@ import os
 from pathlib import Path
 
 from django.db import models
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, UserManager
 import barcode
 from random import randint
 
+from django.http import request
 
 ESTADOS_CHOICES = (
     ('SP', 'SP'),
@@ -141,8 +142,57 @@ class Subcategoria(models.Model):
         db_table = 'subcategoria'
 
 
+# class TabelaPrecos(models.Model):
+#     produto = models.CharField(max_length=30)
+#     preco_compra = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True)
+#     preco_venda = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True)
+#     criado_por = models.ForeignKey(User, on_delete=models.CASCADE, related_name='tabela_precos_criado_por',
+#                                    editable=False)
+#     criado_em = models.DateTimeField(auto_now_add=True)
+#     atualizado_por = models.ForeignKey(User, on_delete=models.CASCADE,
+#                                        related_name='tabela_precos_atualizado_por', editable=False, null=True,
+#                                        blank=True)
+#     atualizado_em = models.DateTimeField(auto_now=True)
+#
+#     def __str__(self):
+#         return f'{self.produto}'
+#
+#     class Meta:
+#         verbose_name = 'Tabela de Preços'
+#         verbose_name_plural = 'Tabela de Preços'
+#         ordering = ['produto']
+#
+#         db_table = 'tabela_precos'
+
+
+# class HistoricoAtualizacaoPrecos(models.Model):
+#     ean = models.CharField(max_length=15)
+#     produto = models.CharField(max_length=30)
+#     preco_compra = models.DecimalField(max_digits=6, decimal_places=2)
+#     preco_venda = models.DecimalField(max_digits=6, decimal_places=2)
+#     motivo_alteracao_preco = models.CharField(max_length=300)
+#     criado_por = models.ForeignKey(User, on_delete=models.CASCADE, related_name='hist_atual_preco_criado_por',
+#                                    editable=False)
+#     criado_em = models.DateTimeField(auto_now_add=True)
+#     atualizado_por = models.ForeignKey(User, on_delete=models.CASCADE,
+#                                        related_name='hist_atual_preco_atualizado_por', editable=False, null=True,
+#                                        blank=True)
+#     atualizado_em = models.DateTimeField(auto_now=True)
+#
+#     def __str__(self):
+#         return f'{self.produto}'
+#
+#     class Meta:
+#         verbose_name = 'Historico de Atualização de Preços'
+#         verbose_name_plural = 'Historico de Atualização de Preços'
+#         ordering = ['produto']
+#
+#         db_table = 'historico_atualizacao_precos'
+
+
 class Produto(models.Model):
-    nome = models.CharField(max_length=30)
+    # produto = models.ForeignKey(HistoricoAtualizacaoPrecos, on_delete=models.CASCADE, related_name='produto_produto')
+    produto = models.CharField(max_length=30)
     descricao = models.CharField(max_length=50)
     genero = models.ForeignKey(Genero, on_delete=models.CASCADE)
     categoria = models.ForeignKey(Categoria, on_delete=models.CASCADE)
@@ -152,21 +202,24 @@ class Produto(models.Model):
     grade = models.CharField(max_length=30)
     min_pecas = models.PositiveSmallIntegerField()
     alerta_min = models.PositiveSmallIntegerField()
+    limite_alerta_min = models.BooleanField(default=False, editable=False)
     total_pecas = models.PositiveSmallIntegerField()
     preco_compra = models.DecimalField(max_digits=6, decimal_places=2)
     preco_venda = models.DecimalField(max_digits=6, decimal_places=2)
+    motivo_alteracao_preco = models.CharField(max_length=300, null=True)
+    # ean = models.ForeignKey(HistoricoAtualizacaoPrecos, on_delete=models.CASCADE, related_name='produto_produto',
+    #                         editable=False)
     ean = models.CharField(max_length=15, editable=False)
     sku = models.CharField(max_length=10, editable=False)
     fornecedor = models.ForeignKey(Fornecedor, on_delete=models.CASCADE)
     criado_por = models.ForeignKey(User, on_delete=models.CASCADE, related_name='produto_criado_por', editable=False)
     criado_em = models.DateTimeField(auto_now_add=True)
-    atualizado_por = models.ForeignKey(User, on_delete=models.CASCADE, related_name='produto_atualizado_por',
-                                       editable=False,
-                                       null=True, blank=True)
+    atualizado_por = models.ForeignKey(User, on_delete=models.CASCADE,
+                                       related_name='produto_atualizado_por', editable=False, null=True, blank=True)
     atualizado_em = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f'{self.nome}'
+        return f'{self.produto}'
 
     def tamanho_codigo(self, tamanho):
         tamanhos = {"P": '1', "M": "2", "G": "3", "GG": "4", "XG": "5"}
@@ -184,31 +237,47 @@ class Produto(models.Model):
         ean_number = barcode.get('ean13', code_id)
         barcodes_folder = Path(__file__).resolve().parent / "barcodes"
         ean_number.save(os.path.join(barcodes_folder, code_id))
-        return ean_number
+        return code_id
 
-
+    def atingiu_limite_min(self):
+        if self.total_pecas <= self.alerta_min:
+            self.limite_alerta_min = True
+        else:
+            self.limite_alerta_min = False
 
     def save(self, *args, **kwargs):
         # if self.id...
+        self.atingiu_limite_min()
         tamanho = f"0{self.tamanho}" if self.tamanho.isdigit() else f"{self.tamanho_codigo(self.tamanho)}00"
         self.ean = self.generate_barcode()
         # //TODO PREENCHER COM ZEROS QUANDO NÃO TIVER 2 DÍGITOS PARA CATEGORIA E SUBCATEGORIA
+        # 0*n vezes se o tamanho for menor que 2
         self.sku = f"{self.genero_id}{self.categoria_id}{self.subcategoria_id}{tamanho}"
+        # print(f'produto.preco_compra: {self.produto.preco_compra}\npreco_compra: {self.preco_compra}')
+        # self.produto.ean = self.ean
+        # self.produto.produto = self.produto
+        # self.produto.preco_compra = self.preco_compra
+        # self.produto.preco_venda = self.preco_venda
+        # self.produto.motivo_alteracao_preco = self.motivo_alteracao_preco
+        # self.produto.save()
+
+        # //TODO HistoricoAtualizacaoPrecos.objects.create() ???
+
+        # self.motivo_alteracao_preco = None
         super().save(*args, **kwargs)  # Call the "real" save() method.
 
     class Meta:
         verbose_name = 'Produto'
         verbose_name_plural = 'Produtos'
-        ordering = ['nome']
+        ordering = ['produto']
 
         db_table = 'produto'
 
 
-class VendasHistory(models.Model):
+class HistoricoVendas(models.Model):
     itens_compra = models.JSONField(default=dict)
     status = models.CharField(max_length=30, choices=VENDAS_STATUS, default='Concluída')
     valor_compra = models.DecimalField(max_digits=6, decimal_places=2)
-    # vendedor = models.ForeignKey(Funcionario.cargo_funcionario, on_delete=models.CASCADE)
     vendedor = models.ForeignKey(Funcionario, on_delete=models.CASCADE, related_name='cargo_vendedor')
     caixa = models.ForeignKey(Funcionario, on_delete=models.CASCADE, related_name='cargo_caixa')
     criado_por = models.ForeignKey(User, on_delete=models.CASCADE, related_name='vendas_criado_por', editable=False)
@@ -217,9 +286,6 @@ class VendasHistory(models.Model):
                                        editable=False,
                                        null=True, blank=True)
     atualizado_em = models.DateTimeField(auto_now=True)
-
-    # def __str__(self):
-    #     return f'{self.nome}'
 
     class Meta:
         verbose_name = 'Histórico de Venda'
@@ -233,3 +299,6 @@ class VendasHistory(models.Model):
 # //TODO COLOCAR CAMPO AUTOMÁTICO PARA INFORMAR SE O PRODUTO SERÁ ENVIADO AUTOMATICAMENTE PARA O PEDIDO
 # //TODO VERIFICAR COMO COLOCAR O USUÁRIO NO CAMPO CRIADO_EM
 # //TODO NA TABELA PEDIDOS COLOCAR CAMPO AUTORIZADO PARA O ANALISTA
+# //TODO ACRESCENTAR CAMPO FORMA DE PAGTO EM VENDASHISTORY
+# //TODO EM VENDAS COLOCAR FORMA DE PAGTO, QUANTIDADE, SUBTOTAL, DESCONTO E TOTAL
+# //TODO CRIAR CAMPO BOOL PARA PRODUTOS QUE ATINGIREM O ALERTA_MIN
