@@ -165,34 +165,8 @@ class Subcategoria(models.Model):
 #         db_table = 'tabela_precos'
 
 
-# class HistoricoAtualizacaoPrecos(models.Model):
-#     ean = models.CharField(max_length=15)
-#     produto = models.CharField(max_length=30)
-#     preco_compra = models.DecimalField(max_digits=6, decimal_places=2)
-#     preco_venda = models.DecimalField(max_digits=6, decimal_places=2)
-#     motivo_alteracao_preco = models.CharField(max_length=300)
-#     criado_por = models.ForeignKey(User, on_delete=models.CASCADE, related_name='hist_atual_preco_criado_por',
-#                                    editable=False)
-#     criado_em = models.DateTimeField(auto_now_add=True)
-#     atualizado_por = models.ForeignKey(User, on_delete=models.CASCADE,
-#                                        related_name='hist_atual_preco_atualizado_por', editable=False, null=True,
-#                                        blank=True)
-#     atualizado_em = models.DateTimeField(auto_now=True)
-#
-#     def __str__(self):
-#         return f'{self.produto}'
-#
-#     class Meta:
-#         verbose_name = 'Historico de Atualização de Preços'
-#         verbose_name_plural = 'Historico de Atualização de Preços'
-#         ordering = ['produto']
-#
-#         db_table = 'historico_atualizacao_precos'
-
-
 class Produto(models.Model):
-    # produto = models.ForeignKey(HistoricoAtualizacaoPrecos, on_delete=models.CASCADE, related_name='produto_produto')
-    produto = models.CharField(max_length=30)
+    # produto = models.CharField(max_length=30)
     descricao = models.CharField(max_length=50)
     genero = models.ForeignKey(Genero, on_delete=models.CASCADE)
     categoria = models.ForeignKey(Categoria, on_delete=models.CASCADE)
@@ -207,8 +181,6 @@ class Produto(models.Model):
     preco_compra = models.DecimalField(max_digits=6, decimal_places=2)
     preco_venda = models.DecimalField(max_digits=6, decimal_places=2)
     motivo_alteracao_preco = models.CharField(max_length=300, null=True)
-    # ean = models.ForeignKey(HistoricoAtualizacaoPrecos, on_delete=models.CASCADE, related_name='produto_produto',
-    #                         editable=False)
     ean = models.CharField(max_length=15, editable=False)
     sku = models.CharField(max_length=10, editable=False)
     fornecedor = models.ForeignKey(Fornecedor, on_delete=models.CASCADE)
@@ -219,7 +191,7 @@ class Produto(models.Model):
     atualizado_em = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f'{self.produto}'
+        return f'{self.descricao}'
 
     def tamanho_codigo(self, tamanho):
         tamanhos = {"P": '1', "M": "2", "G": "3", "GG": "4", "XG": "5"}
@@ -230,7 +202,7 @@ class Produto(models.Model):
         //TODO Criar essa função recebendo o número após ser checado no DB se o mesmo não existe
         Se não encontrar esse code_id no DB atribui o code_id ao produto
         Exemplo:
-        obj = get_object_or_404(MyModel, pk=code_id)
+        update_or_create()
         Se já existir gera outro code_id
         '''
         code_id = str(randint(7890000000000, 7899999999999))
@@ -241,37 +213,60 @@ class Produto(models.Model):
 
     def atingiu_limite_min(self):
         if self.total_pecas <= self.alerta_min:
-            self.limite_alerta_min = True
-        else:
             self.limite_alerta_min = False
+        else:
+            self.limite_alerta_min = True
 
     def save(self, *args, **kwargs):
-        # if self.id...
         self.atingiu_limite_min()
         tamanho = f"0{self.tamanho}" if self.tamanho.isdigit() else f"{self.tamanho_codigo(self.tamanho)}00"
-        self.ean = self.generate_barcode()
+        if not self.ean:
+            self.ean = self.generate_barcode()
         # //TODO PREENCHER COM ZEROS QUANDO NÃO TIVER 2 DÍGITOS PARA CATEGORIA E SUBCATEGORIA
         # 0*n vezes se o tamanho for menor que 2
         self.sku = f"{self.genero_id}{self.categoria_id}{self.subcategoria_id}{tamanho}"
         # print(f'produto.preco_compra: {self.produto.preco_compra}\npreco_compra: {self.preco_compra}')
-        # self.produto.ean = self.ean
-        # self.produto.produto = self.produto
-        # self.produto.preco_compra = self.preco_compra
-        # self.produto.preco_venda = self.preco_venda
-        # self.produto.motivo_alteracao_preco = self.motivo_alteracao_preco
-        # self.produto.save()
 
-        # //TODO HistoricoAtualizacaoPrecos.objects.create() ???
+        HistoricoAtualizacaoPrecos.objects.create(
+            ean=self.ean,
+            descricao=self.descricao,
+            preco_compra=self.preco_compra,
+            preco_venda=self.preco_venda,
+            motivo_alteracao_preco=self.motivo_alteracao_preco
+        )
 
-        # self.motivo_alteracao_preco = None
+        self.motivo_alteracao_preco = None
         super().save(*args, **kwargs)  # Call the "real" save() method.
 
     class Meta:
         verbose_name = 'Produto'
         verbose_name_plural = 'Produtos'
-        ordering = ['produto']
+        ordering = ['descricao']
 
         db_table = 'produto'
+
+
+class HistoricoAtualizacaoPrecos(models.Model):
+    # ean = models.ForeignKey(Produto, on_delete=models.CASCADE, related_name='hist_atual_preco_produto')
+    ean = models.CharField(max_length=15)
+    descricao = models.CharField(max_length=30)
+    # descricao = models.ForeignKey(Produto, on_delete=models.CASCADE, related_name='hist_atual_preco_produto')
+    preco_compra = models.DecimalField(max_digits=6, decimal_places=2)
+    preco_venda = models.DecimalField(max_digits=6, decimal_places=2)
+    motivo_alteracao_preco = models.CharField(max_length=300)
+    # criado_por = models.ForeignKey(User, on_delete=models.CASCADE, related_name='hist_atual_preco_criado_por',
+    #                                editable=False)
+    criado_em = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f'{self.descricao}'
+
+    class Meta:
+        verbose_name = 'Historico de Atualização de Preços'
+        verbose_name_plural = 'Historico de Atualização de Preços'
+        ordering = ['-criado_em']
+
+        db_table = 'historico_atualizacao_precos'
 
 
 class HistoricoVendas(models.Model):
@@ -282,17 +277,13 @@ class HistoricoVendas(models.Model):
     caixa = models.ForeignKey(Funcionario, on_delete=models.CASCADE, related_name='cargo_caixa')
     criado_por = models.ForeignKey(User, on_delete=models.CASCADE, related_name='vendas_criado_por', editable=False)
     criado_em = models.DateTimeField(auto_now_add=True)
-    atualizado_por = models.ForeignKey(User, on_delete=models.CASCADE, related_name='vendas_atualizado_por',
-                                       editable=False,
-                                       null=True, blank=True)
-    atualizado_em = models.DateTimeField(auto_now=True)
 
     class Meta:
         verbose_name = 'Histórico de Venda'
         verbose_name_plural = 'Histórico de Vendas'
-        ordering = ['criado_em']
+        ordering = ['-criado_em']
 
-        db_table = 'vendas_history'
+        db_table = 'historico_vendas'
 
 # //TODO VERIFICAR ON_DELETE E UNIQUE
 # //TODO EM VENDAS PRECISA VER COMO PEGAR SOMENTE OS FUNCIONÁRIOS COM CARGO VENDEDOR E CAIXA OU GRUPO?!

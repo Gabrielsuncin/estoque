@@ -1,5 +1,6 @@
 from django.contrib import admin
-from .models import Fornecedor, Funcionario, Genero, Categoria, Subcategoria, Produto, HistoricoVendas
+from .models import Fornecedor, Funcionario, Genero, Categoria, Subcategoria, Produto, HistoricoVendas, \
+    HistoricoAtualizacaoPrecos
 
 
 # def save_model(self, request, obj, form, change):
@@ -98,13 +99,13 @@ class SubcategoriaAdmin(admin.ModelAdmin):
 
 
 class ProdutoAdmin(admin.ModelAdmin):
-    list_display = ['id', 'produto', 'descricao', 'genero', 'categoria', 'subcategoria', 'tamanho', 'cor', 'grade',
+    list_display = ['id', 'descricao', 'genero', 'categoria', 'subcategoria', 'tamanho', 'cor', 'grade',
                     'min_pecas', 'alerta_min', 'limite_alerta_min', 'total_pecas', 'preco_compra', 'preco_venda', 'ean',
                     'sku', 'fornecedor', 'criado_por', 'criado_em', 'atualizado_por', 'atualizado_em', ]
-    search_fields = ['id', 'produto', 'descricao', 'genero', 'categoria', 'subcategoria', 'tamanho', 'cor', 'grade',
+    search_fields = ['id', 'descricao', 'genero', 'categoria', 'subcategoria', 'tamanho', 'cor', 'grade',
                      'alerta_min', 'limite_alerta_min', 'ean', 'sku', 'fornecedor', 'criado_por', 'criado_em',
                      'atualizado_por', 'atualizado_em', ]
-    list_filter = ['id', 'produto', 'descricao', 'genero', 'categoria', 'subcategoria', 'tamanho', 'cor', 'grade',
+    list_filter = ['id', 'descricao', 'genero', 'categoria', 'subcategoria', 'tamanho', 'cor', 'grade',
                    'alerta_min', 'limite_alerta_min', 'ean', 'sku', 'fornecedor', 'criado_por', 'criado_em',
                    'atualizado_por', 'atualizado_em', ]
 
@@ -117,12 +118,9 @@ class ProdutoAdmin(admin.ModelAdmin):
 
 
 class HistoricoVendasAdmin(admin.ModelAdmin):
-    list_display = ['id', 'status', 'itens_compra', 'valor_compra', 'vendedor', 'caixa', 'criado_por', 'criado_em',
-                    'atualizado_por', 'atualizado_em', ]
-    search_fields = ['id', 'status', 'itens_compra', 'valor_compra', 'vendedor', 'caixa', 'criado_por', 'criado_em',
-                     'atualizado_por', 'atualizado_em', ]
-    list_filter = ['id', 'status', 'itens_compra', 'valor_compra', 'vendedor', 'caixa', 'criado_por', 'criado_em',
-                   'atualizado_por', 'atualizado_em', ]
+    list_display = ['id', 'status', 'itens_compra', 'valor_compra', 'vendedor', 'caixa', 'criado_por', 'criado_em', ]
+    search_fields = ['id', 'status', 'itens_compra', 'valor_compra', 'vendedor', 'caixa', 'criado_por', 'criado_em', ]
+    list_filter = ['id', 'status', 'itens_compra', 'valor_compra', 'vendedor', 'caixa', 'criado_por', 'criado_em', ]
 
     def save_model(self, request, obj, form, change):
         if not obj.pk:
@@ -132,20 +130,20 @@ class HistoricoVendasAdmin(admin.ModelAdmin):
         obj.save()
 
 
-# class HistoricoAtualizacaoPrecosAdmin(admin.ModelAdmin):
-#     list_display = ['id', 'ean', 'produto', 'preco_compra', 'preco_venda', 'motivo_alteracao_preco', 'criado_por',
-#                     'criado_em', 'atualizado_por', 'atualizado_em', ]
-#     search_fields = ['id', 'ean', 'produto', 'preco_compra', 'preco_venda', 'motivo_alteracao_preco', 'criado_por',
-#                     'criado_em', 'atualizado_por', 'atualizado_em', ]
-#     list_filter = ['id', 'ean', 'produto', 'preco_compra', 'preco_venda', 'motivo_alteracao_preco', 'criado_por',
-#                     'criado_em', 'atualizado_por', 'atualizado_em', ]
-#
-#     def save_model(self, request, obj, form, change):
-#         if not obj.pk:
-#             obj.criado_por = request.user
-#         else:
-#             obj.atualizado_por = request.user
-#         obj.save()
+class HistoricoAtualizacaoPrecosAdmin(admin.ModelAdmin):
+    list_display = ['id', 'ean', 'descricao', 'preco_compra', 'preco_venda', 'motivo_alteracao_preco',
+                    'criado_em' ]
+    search_fields = ['id', 'ean', 'descricao', 'preco_compra', 'preco_venda', 'motivo_alteracao_preco',
+                    'criado_em', ]
+    list_filter = ['id', 'ean', 'descricao', 'preco_compra', 'preco_venda', 'motivo_alteracao_preco',
+                    'criado_em', ]
+
+    # def save_model(self, request, obj, form, change):
+    #     if not obj.pk:
+    #         obj.criado_por = request.user
+    #     else:
+    #         obj.atualizado_por = request.user
+    #     obj.save()
 
 
 admin.site.register(Fornecedor, FornecedorAdmin)
@@ -155,6 +153,6 @@ admin.site.register(Categoria, CategoriaAdmin)
 admin.site.register(Subcategoria, SubcategoriaAdmin)
 admin.site.register(Produto, ProdutoAdmin)
 admin.site.register(HistoricoVendas, HistoricoVendasAdmin)
-# admin.site.register(HistoricoAtualizacaoPrecos, HistoricoAtualizacaoPrecosAdmin)
+admin.site.register(HistoricoAtualizacaoPrecos, HistoricoAtualizacaoPrecosAdmin)
 
 # //TODO SELECIONAR CAMPOS A SEREM MOSTRADOS NO FILTRO
