@@ -191,18 +191,16 @@ class Produto(models.Model):
     atualizado_em = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f'{self.descricao}'
+        return f'{self.ean}'
 
     def tamanho_codigo(self, tamanho):
-        tamanhos = {"P": '1', "M": "2", "G": "3", "GG": "4", "XG": "5"}
+        tamanhos = {"P": '100', "M": "200", "G": "300", "GG": "400", "XG": "500"}
         return tamanhos[tamanho]
 
     def generate_barcode(self):
         '''
         //TODO Criar essa função recebendo o número após ser checado no DB se o mesmo não existe
         Se não encontrar esse code_id no DB atribui o code_id ao produto
-        Exemplo:
-        update_or_create()
         Se já existir gera outro code_id
         '''
         code_id = str(randint(7890000000000, 7899999999999))
@@ -210,6 +208,20 @@ class Produto(models.Model):
         barcodes_folder = Path(__file__).resolve().parent / "barcodes"
         ean_number.save(os.path.join(barcodes_folder, code_id))
         return code_id
+
+    def generate_sku(self):
+        """
+        Exemplo:
+        Genero: M
+        Categoria: CS
+        Subcategoria: ML
+        Tamanho: 004
+        Sequencias: 001
+        Ficando: MCSML004001
+
+        As sequências se iniciarão em 001 para cada tipo de produto de acordo com a categoria
+        """
+        pass
 
     def atingiu_limite_min(self):
         if self.total_pecas <= self.alerta_min:
@@ -219,24 +231,34 @@ class Produto(models.Model):
 
     def save(self, *args, **kwargs):
         self.atingiu_limite_min()
-        tamanho = f"0{self.tamanho}" if self.tamanho.isdigit() else f"{self.tamanho_codigo(self.tamanho)}00"
+        tamanho = f"{self.tamanho}" if self.tamanho.isdigit() else f"{self.tamanho_codigo(self.tamanho)}"
         if not self.ean:
             self.ean = self.generate_barcode()
-        # //TODO PREENCHER COM ZEROS QUANDO NÃO TIVER 2 DÍGITOS PARA CATEGORIA E SUBCATEGORIA
-        # 0*n vezes se o tamanho for menor que 2
-        self.sku = f"{self.genero_id}{self.categoria_id}{self.subcategoria_id}{tamanho}"
-        # print(f'produto.preco_compra: {self.produto.preco_compra}\npreco_compra: {self.preco_compra}')
 
-        HistoricoAtualizacaoPrecos.objects.create(
-            ean=self.ean,
-            descricao=self.descricao,
-            preco_compra=self.preco_compra,
-            preco_venda=self.preco_venda,
-            motivo_alteracao_preco=self.motivo_alteracao_preco
-        )
+        categoria_number = ''
+        sub_categoria_number = ''
+        if len(str(self.categoria_id)) < 2:
+            categoria_number = f"0{self.categoria_id}"
+        if len(str(self.subcategoria_id)) < 2:
+            sub_categoria_number = f"0{self.subcategoria_id}"
+        self.sku = f"{self.genero_id}{categoria_number}{sub_categoria_number}{tamanho}"
+
+        motivo = self.motivo_alteracao_preco
 
         self.motivo_alteracao_preco = None
-        super().save(*args, **kwargs)  # Call the "real" save() method.
+        super().save(*args, **kwargs)
+
+        p = Produto.objects.filter(ean=self.ean).first()
+        h = HistoricoAtualizacaoPrecos.objects.filter(ean=p).first()
+        if ((h and p) and ((h.preco_compra != p.preco_compra) or (h.preco_venda != p.preco_venda))) or p and not h:
+            HistoricoAtualizacaoPrecos.objects.create(
+                ean=p,
+                descricao=self.descricao,
+                preco_compra=self.preco_compra,
+                preco_venda=self.preco_venda,
+                motivo_alteracao_preco=motivo,
+                criado_por=self.criado_por
+            )
 
     class Meta:
         verbose_name = 'Produto'
@@ -247,19 +269,17 @@ class Produto(models.Model):
 
 
 class HistoricoAtualizacaoPrecos(models.Model):
-    # ean = models.ForeignKey(Produto, on_delete=models.CASCADE, related_name='hist_atual_preco_produto')
-    ean = models.CharField(max_length=15)
+    ean = models.ForeignKey(Produto, on_delete=models.CASCADE, related_name='hist_atual_preco_produto')
     descricao = models.CharField(max_length=30)
-    # descricao = models.ForeignKey(Produto, on_delete=models.CASCADE, related_name='hist_atual_preco_produto')
     preco_compra = models.DecimalField(max_digits=6, decimal_places=2)
     preco_venda = models.DecimalField(max_digits=6, decimal_places=2)
     motivo_alteracao_preco = models.CharField(max_length=300)
-    # criado_por = models.ForeignKey(User, on_delete=models.CASCADE, related_name='hist_atual_preco_criado_por',
-    #                                editable=False)
+    criado_por = models.ForeignKey(User, on_delete=models.CASCADE, related_name='hist_atual_preco_criado_por',
+                                   editable=False)
     criado_em = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f'{self.descricao}'
+        return f'{self.ean.ean}'
 
     class Meta:
         verbose_name = 'Historico de Atualização de Preços'
@@ -293,3 +313,4 @@ class HistoricoVendas(models.Model):
 # //TODO ACRESCENTAR CAMPO FORMA DE PAGTO EM VENDASHISTORY
 # //TODO EM VENDAS COLOCAR FORMA DE PAGTO, QUANTIDADE, SUBTOTAL, DESCONTO E TOTAL
 # //TODO CRIAR CAMPO BOOL PARA PRODUTOS QUE ATINGIREM O ALERTA_MIN
+# //TODO CRIAR FUNÇÃO PARA SKU CONTENDO UM PADRÃO. AS IDEIAS ESTÃO COMENTADAS COM A FUNÇÃO

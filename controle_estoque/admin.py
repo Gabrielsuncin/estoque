@@ -131,11 +131,11 @@ class HistoricoVendasAdmin(admin.ModelAdmin):
 
 
 class HistoricoAtualizacaoPrecosAdmin(admin.ModelAdmin):
-    list_display = ['id', 'ean', 'descricao', 'preco_compra', 'preco_venda', 'motivo_alteracao_preco',
+    list_display = ['id', 'ean', 'descricao', 'preco_compra', 'preco_venda', 'motivo_alteracao_preco', 'criado_por',
                     'criado_em' ]
-    search_fields = ['id', 'ean', 'descricao', 'preco_compra', 'preco_venda', 'motivo_alteracao_preco',
+    search_fields = ['id', 'ean', 'descricao', 'preco_compra', 'preco_venda', 'motivo_alteracao_preco', 'criado_por',
                     'criado_em', ]
-    list_filter = ['id', 'ean', 'descricao', 'preco_compra', 'preco_venda', 'motivo_alteracao_preco',
+    list_filter = ['id', 'ean', 'descricao', 'preco_compra', 'preco_venda', 'motivo_alteracao_preco', 'criado_por',
                     'criado_em', ]
 
     # def save_model(self, request, obj, form, change):
@@ -156,3 +156,4 @@ admin.site.register(HistoricoVendas, HistoricoVendasAdmin)
 admin.site.register(HistoricoAtualizacaoPrecos, HistoricoAtualizacaoPrecosAdmin)
 
 # //TODO SELECIONAR CAMPOS A SEREM MOSTRADOS NO FILTRO
+# //TODO FAZER DECORATOR PARA SAVE_MODEL
