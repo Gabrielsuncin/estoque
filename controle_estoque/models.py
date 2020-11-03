@@ -203,6 +203,7 @@ class Produto(models.Model):
     preco_compra = models.DecimalField(max_digits=6, decimal_places=2)
     preco_venda = models.DecimalField(max_digits=6, decimal_places=2)
     motivo_alteracao_preco = models.CharField(max_length=300, null=True)
+    auto_pedido = models.BooleanField(default=False)
     ean = models.CharField(max_length=13, editable=False)
     sku = models.CharField(max_length=10, editable=False)
     fornecedor = models.ForeignKey(Fornecedor, on_delete=models.CASCADE)
@@ -295,12 +296,10 @@ class HistoricoVendas(models.Model):
 
         db_table = 'historico_vendas'
 
-# //TODO VERIFICAR ON_DELETE E UNIQUE
+# //TODO VERIFICAR ON_DELETE E UNIQUE https://docs.djangoproject.com/pt-br/3.1/ref/models/fields/
 # //TODO EM VENDAS PRECISA VER COMO PEGAR SOMENTE OS FUNCIONÁRIOS COM CARGO VENDEDOR E CAIXA OU GRUPO?!
-# //TODO COLOCAR CAMPO AUTOMÁTICO PARA INFORMAR SE O PRODUTO SERÁ ENVIADO AUTOMATICAMENTE PARA O PEDIDO
-# //TODO VERIFICAR COMO COLOCAR O USUÁRIO NO CAMPO CRIADO_EM
+# //TODO VERIFICAR COMO COLOCAR O USUÁRIO NO CAMPO CRIADO_POR
 # //TODO NA TABELA PEDIDOS COLOCAR CAMPO AUTORIZADO PARA O ANALISTA
 # //TODO ACRESCENTAR CAMPO FORMA DE PAGTO EM VENDASHISTORY
 # //TODO EM VENDAS COLOCAR FORMA DE PAGTO, QUANTIDADE, SUBTOTAL, DESCONTO E TOTAL
-# //TODO CRIAR CAMPO BOOL PARA PRODUTOS QUE ATINGIREM O ALERTA_MIN
-# //TODO CRIAR FUNÇÃO PARA SKU CONTENDO UM PADRÃO. AS IDEIAS ESTÃO COMENTADAS COM A FUNÇÃO
+# //TODO FAZER FUNÇÃO DELETE PARA CRIAR LOG E ENVIAR EMAIL AOS ADMINS

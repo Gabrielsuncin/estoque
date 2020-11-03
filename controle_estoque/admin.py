@@ -97,13 +97,13 @@ class TamanhoProdutoAdmin(admin.ModelAdmin):
 
 class ProdutoAdmin(admin.ModelAdmin):
     list_display = ['id', 'descricao', 'genero', 'categoria', 'subcategoria', 'tamanho', 'cor', 'grade',
-                    'min_pecas', 'alerta_min', 'limite_alerta_min', 'total_pecas', 'preco_compra', 'preco_venda', 'motivo_alteracao_preco', 'ean',
+                    'min_pecas', 'alerta_min', 'limite_alerta_min', 'total_pecas', 'preco_compra', 'preco_venda', 'motivo_alteracao_preco', 'auto_pedido', 'ean',
                     'sku', 'fornecedor', 'criado_por', 'criado_em', 'atualizado_por', 'atualizado_em', ]
     search_fields = ['id', 'descricao', 'genero', 'categoria', 'subcategoria', 'tamanho', 'cor', 'grade',
-                     'alerta_min', 'limite_alerta_min', 'motivo_alteracao_preco', 'ean', 'sku', 'fornecedor', 'criado_por', 'criado_em',
+                     'alerta_min', 'limite_alerta_min', 'motivo_alteracao_preco', 'auto_pedido', 'ean', 'sku', 'fornecedor', 'criado_por', 'criado_em',
                      'atualizado_por', 'atualizado_em', ]
     list_filter = ['id', 'descricao', 'genero', 'categoria', 'subcategoria', 'tamanho', 'cor', 'grade',
-                   'alerta_min', 'limite_alerta_min', 'motivo_alteracao_preco', 'ean', 'sku', 'fornecedor', 'criado_por', 'criado_em',
+                   'alerta_min', 'limite_alerta_min', 'motivo_alteracao_preco', 'auto_pedido', 'ean', 'sku', 'fornecedor', 'criado_por', 'criado_em',
                    'atualizado_por', 'atualizado_em', ]
 
     def save_model(self, request, obj, form, change):
