@@ -28,7 +28,7 @@ def generate_barcode(self):
     code_id = str(randint(7890000000000, 7899999999999))
     ean_number = barcode.get('ean13', code_id)
     barcodes_folder = Path(__file__).resolve().parent / "barcodes"
-    ean_number.save(os.path.join(barcodes_folder, code_id))
+    ean_number.save()
     return HttpResponse(f'Código de barras {ean_number} criado com sucesso!')
 
 

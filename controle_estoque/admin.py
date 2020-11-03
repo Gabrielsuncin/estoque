@@ -1,6 +1,6 @@
 from django.contrib import admin
 from .models import Fornecedor, Funcionario, Genero, Categoria, Subcategoria, Produto, HistoricoVendas, \
-    HistoricoAtualizacaoPrecos
+    HistoricoAtualizacaoPrecos, TamanhoProduto
 
 
 # def save_model(self, request, obj, form, change):
@@ -57,9 +57,9 @@ class GeneroAdmin(admin.ModelAdmin):
 
 
 class CategoriaAdmin(admin.ModelAdmin):
-    list_display = ['id', 'categoria', 'criado_por', 'criado_em', 'atualizado_por', 'atualizado_em', ]
-    search_fields = ['id', 'categoria', 'criado_por', 'criado_em', 'atualizado_por', 'atualizado_em', ]
-    list_filter = ['id', 'categoria', 'criado_por', 'criado_em', 'atualizado_por', 'atualizado_em', ]
+    list_display = ['id', 'categoria', 'codigo', 'criado_por', 'criado_em', 'atualizado_por', 'atualizado_em', ]
+    search_fields = ['id', 'categoria', 'codigo', 'criado_por', 'criado_em', 'atualizado_por', 'atualizado_em', ]
+    list_filter = ['id', 'categoria', 'codigo', 'criado_por', 'criado_em', 'atualizado_por', 'atualizado_em', ]
 
     def save_model(self, request, obj, form, change):
         if not obj.pk:
@@ -70,9 +70,9 @@ class CategoriaAdmin(admin.ModelAdmin):
 
 
 class SubcategoriaAdmin(admin.ModelAdmin):
-    list_display = ['id', 'subcategoria', 'criado_por', 'criado_em', 'atualizado_por', 'atualizado_em', ]
-    search_fields = ['id', 'subcategoria', 'criado_por', 'criado_em', 'atualizado_por', 'atualizado_em', ]
-    list_filter = ['id', 'subcategoria', 'criado_por', 'criado_em', 'atualizado_por', 'atualizado_em', ]
+    list_display = ['id', 'subcategoria', 'codigo', 'criado_por', 'criado_em', 'atualizado_por', 'atualizado_em', ]
+    search_fields = ['id', 'subcategoria', 'codigo', 'criado_por', 'criado_em', 'atualizado_por', 'atualizado_em', ]
+    list_filter = ['id', 'subcategoria', 'codigo', 'criado_por', 'criado_em', 'atualizado_por', 'atualizado_em', ]
 
     def save_model(self, request, obj, form, change):
         if not obj.pk:
@@ -82,45 +82,29 @@ class SubcategoriaAdmin(admin.ModelAdmin):
         obj.save()
 
 
-# class TabelaPrecosAdmin(admin.ModelAdmin):
-#     list_display = ['id', 'produto', 'preco_compra', 'preco_venda', 'criado_por', 'criado_em', 'atualizado_por',
-#                     'atualizado_em', ]
-#     search_fields = ['id', 'produto', 'preco_compra', 'preco_venda', 'criado_por', 'criado_em', 'atualizado_por',
-#                      'atualizado_em', ]
-#     list_filter = ['id', 'produto', 'preco_compra', 'preco_venda', 'criado_por', 'criado_em', 'atualizado_por',
-#                    'atualizado_em', ]
-#
-#     def save_model(self, request, obj, form, change):
-#         if not obj.pk:
-#             obj.criado_por = request.user
-#         else:
-#             obj.atualizado_por = request.user
-#         obj.save()
+class TamanhoProdutoAdmin(admin.ModelAdmin):
+    list_display = ['id', 'tamanho', 'criado_por', 'criado_em', 'atualizado_por', 'atualizado_em', ]
+    search_fields = ['id', 'tamanho', 'criado_por', 'criado_em', 'atualizado_por', 'atualizado_em', ]
+    list_filter = ['id', 'tamanho', 'criado_por', 'criado_em', 'atualizado_por', 'atualizado_em', ]
+
+    def save_model(self, request, obj, form, change):
+        if not obj.pk:
+            obj.criado_por = request.user
+        else:
+            obj.atualizado_por = request.user
+        obj.save()
 
 
 class ProdutoAdmin(admin.ModelAdmin):
     list_display = ['id', 'descricao', 'genero', 'categoria', 'subcategoria', 'tamanho', 'cor', 'grade',
-                    'min_pecas', 'alerta_min', 'limite_alerta_min', 'total_pecas', 'preco_compra', 'preco_venda', 'ean',
+                    'min_pecas', 'alerta_min', 'limite_alerta_min', 'total_pecas', 'preco_compra', 'preco_venda', 'motivo_alteracao_preco', 'ean',
                     'sku', 'fornecedor', 'criado_por', 'criado_em', 'atualizado_por', 'atualizado_em', ]
     search_fields = ['id', 'descricao', 'genero', 'categoria', 'subcategoria', 'tamanho', 'cor', 'grade',
-                     'alerta_min', 'limite_alerta_min', 'ean', 'sku', 'fornecedor', 'criado_por', 'criado_em',
+                     'alerta_min', 'limite_alerta_min', 'motivo_alteracao_preco', 'ean', 'sku', 'fornecedor', 'criado_por', 'criado_em',
                      'atualizado_por', 'atualizado_em', ]
     list_filter = ['id', 'descricao', 'genero', 'categoria', 'subcategoria', 'tamanho', 'cor', 'grade',
-                   'alerta_min', 'limite_alerta_min', 'ean', 'sku', 'fornecedor', 'criado_por', 'criado_em',
+                   'alerta_min', 'limite_alerta_min', 'motivo_alteracao_preco', 'ean', 'sku', 'fornecedor', 'criado_por', 'criado_em',
                    'atualizado_por', 'atualizado_em', ]
-
-    def save_model(self, request, obj, form, change):
-        if not obj.pk:
-            obj.criado_por = request.user
-        else:
-            obj.atualizado_por = request.user
-        obj.save()
-
-
-class HistoricoVendasAdmin(admin.ModelAdmin):
-    list_display = ['id', 'status', 'itens_compra', 'valor_compra', 'vendedor', 'caixa', 'criado_por', 'criado_em', ]
-    search_fields = ['id', 'status', 'itens_compra', 'valor_compra', 'vendedor', 'caixa', 'criado_por', 'criado_em', ]
-    list_filter = ['id', 'status', 'itens_compra', 'valor_compra', 'vendedor', 'caixa', 'criado_por', 'criado_em', ]
 
     def save_model(self, request, obj, form, change):
         if not obj.pk:
@@ -146,6 +130,19 @@ class HistoricoAtualizacaoPrecosAdmin(admin.ModelAdmin):
     #     obj.save()
 
 
+class HistoricoVendasAdmin(admin.ModelAdmin):
+    list_display = ['id', 'itens_compra', 'status', 'valor_compra', 'vendedor', 'caixa', 'criado_por', 'criado_em', ]
+    search_fields = ['id', 'itens_compra', 'status', 'valor_compra', 'vendedor', 'caixa', 'criado_por', 'criado_em', ]
+    list_filter = ['id', 'itens_compra', 'status', 'valor_compra', 'vendedor', 'caixa', 'criado_por', 'criado_em', ]
+
+    def save_model(self, request, obj, form, change):
+        if not obj.pk:
+            obj.criado_por = request.user
+        else:
+            obj.atualizado_por = request.user
+        obj.save()
+
+
 admin.site.register(Fornecedor, FornecedorAdmin)
 admin.site.register(Funcionario, FuncionarioAdmin)
 admin.site.register(Genero, GeneroAdmin)
@@ -154,6 +151,7 @@ admin.site.register(Subcategoria, SubcategoriaAdmin)
 admin.site.register(Produto, ProdutoAdmin)
 admin.site.register(HistoricoVendas, HistoricoVendasAdmin)
 admin.site.register(HistoricoAtualizacaoPrecos, HistoricoAtualizacaoPrecosAdmin)
+admin.site.register(TamanhoProduto, TamanhoProdutoAdmin)
 
 # //TODO SELECIONAR CAMPOS A SEREM MOSTRADOS NO FILTRO
 # //TODO FAZER DECORATOR PARA SAVE_MODEL

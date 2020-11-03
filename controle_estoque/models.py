@@ -103,6 +103,7 @@ class Genero(models.Model):
 
 class Categoria(models.Model):
     categoria = models.CharField(max_length=30)
+    codigo = models.CharField(max_length=3)
     criado_por = models.ForeignKey(User, on_delete=models.CASCADE, related_name='categoria_criado_por', editable=False)
     criado_em = models.DateTimeField(auto_now_add=True)
     atualizado_por = models.ForeignKey(User, on_delete=models.CASCADE, related_name='categoria_atualizado_por',
@@ -112,6 +113,17 @@ class Categoria(models.Model):
 
     def __str__(self):
         return f'{self.categoria}'
+
+    def save(self, *args, **kwargs):
+        # //TODO FAZER FILTER
+        categorias = Categoria.objects.all()
+        for categoria in categorias:
+            if categoria.categoria == self.categoria:
+                self.sequencial = str(int(self.sequencial) + 1)
+                # //TODO FAZER MÁSCARA
+                n = 3 - len(self.sequencial)
+                self.sequencial = f"{n * '0'}{self.sequencial}"
+        super(Categoria, self).save(*args, **kwargs)
 
     class Meta:
         verbose_name = 'Categoria'
@@ -123,6 +135,7 @@ class Categoria(models.Model):
 
 class Subcategoria(models.Model):
     subcategoria = models.CharField(max_length=30)
+    codigo = models.CharField(max_length=3)
     criado_por = models.ForeignKey(User, on_delete=models.CASCADE, related_name='subcategoria_criado_por',
                                    editable=False)
     criado_em = models.DateTimeField(auto_now_add=True)
@@ -134,6 +147,16 @@ class Subcategoria(models.Model):
     def __str__(self):
         return f'{self.subcategoria}'
 
+    def save(self, *args, **kwargs):
+        # //TODO FAZER FILTER
+        subcategorias = Subcategoria.objects.all()
+        codigos = [i.codigo for i in subcategorias]
+        if not self.codigo in codigos:
+            super(Subcategoria, self).save(*args, **kwargs)
+        else:
+            self.codigo = 'NUL'
+            super(Subcategoria, self).save()
+
     class Meta:
         verbose_name = 'Subcategoria'
         verbose_name_plural = 'Subcategorias'
@@ -142,36 +165,35 @@ class Subcategoria(models.Model):
         db_table = 'subcategoria'
 
 
-# class TabelaPrecos(models.Model):
-#     produto = models.CharField(max_length=30)
-#     preco_compra = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True)
-#     preco_venda = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True)
-#     criado_por = models.ForeignKey(User, on_delete=models.CASCADE, related_name='tabela_precos_criado_por',
-#                                    editable=False)
-#     criado_em = models.DateTimeField(auto_now_add=True)
-#     atualizado_por = models.ForeignKey(User, on_delete=models.CASCADE,
-#                                        related_name='tabela_precos_atualizado_por', editable=False, null=True,
-#                                        blank=True)
-#     atualizado_em = models.DateTimeField(auto_now=True)
-#
-#     def __str__(self):
-#         return f'{self.produto}'
-#
-#     class Meta:
-#         verbose_name = 'Tabela de Preços'
-#         verbose_name_plural = 'Tabela de Preços'
-#         ordering = ['produto']
-#
-#         db_table = 'tabela_precos'
+class TamanhoProduto(models.Model):
+    tamanho = models.CharField(max_length=2)
+    criado_por = models.ForeignKey(User, on_delete=models.CASCADE, related_name='tamanho_criado_por', editable=False)
+    criado_em = models.DateTimeField(auto_now_add=True)
+    atualizado_por = models.ForeignKey(User, on_delete=models.CASCADE,
+                                       related_name='tamanho_atualizado_por', editable=False, null=True, blank=True)
+    atualizado_em = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f'{self.tamanho}'
+
+    # def save(self, *args, **kwargs):
+    #     self.tamanho = f"{self.tamanho}{(2 - len(self.tamanho))*'0'}"
+    #     super(TamanhoProduto, self).save(*args, **kwargs)
+
+    class Meta:
+        verbose_name = 'Tamanho do Produto'
+        verbose_name_plural = 'Tamanho dos Produtos'
+        ordering = ['tamanho']
+
+        db_table = 'tamanho_produto'
 
 
 class Produto(models.Model):
-    # produto = models.CharField(max_length=30)
     descricao = models.CharField(max_length=50)
     genero = models.ForeignKey(Genero, on_delete=models.CASCADE)
     categoria = models.ForeignKey(Categoria, on_delete=models.CASCADE)
     subcategoria = models.ForeignKey(Subcategoria, on_delete=models.CASCADE)
-    tamanho = models.CharField(max_length=10)
+    tamanho = models.ForeignKey(TamanhoProduto, on_delete=models.PROTECT)
     cor = models.CharField(max_length=30)
     grade = models.CharField(max_length=30)
     min_pecas = models.PositiveSmallIntegerField()
@@ -181,7 +203,7 @@ class Produto(models.Model):
     preco_compra = models.DecimalField(max_digits=6, decimal_places=2)
     preco_venda = models.DecimalField(max_digits=6, decimal_places=2)
     motivo_alteracao_preco = models.CharField(max_length=300, null=True)
-    ean = models.CharField(max_length=15, editable=False)
+    ean = models.CharField(max_length=13, editable=False)
     sku = models.CharField(max_length=10, editable=False)
     fornecedor = models.ForeignKey(Fornecedor, on_delete=models.CASCADE)
     criado_por = models.ForeignKey(User, on_delete=models.CASCADE, related_name='produto_criado_por', editable=False)
@@ -193,10 +215,6 @@ class Produto(models.Model):
     def __str__(self):
         return f'{self.ean}'
 
-    def tamanho_codigo(self, tamanho):
-        tamanhos = {"P": '100', "M": "200", "G": "300", "GG": "400", "XG": "500"}
-        return tamanhos[tamanho]
-
     def generate_barcode(self):
         '''
         //TODO Criar essa função recebendo o número após ser checado no DB se o mesmo não existe
@@ -204,49 +222,21 @@ class Produto(models.Model):
         Se já existir gera outro code_id
         '''
         code_id = str(randint(7890000000000, 7899999999999))
-        ean_number = barcode.get('ean13', code_id)
-        barcodes_folder = Path(__file__).resolve().parent / "barcodes"
-        ean_number.save(os.path.join(barcodes_folder, code_id))
+        # //TODO SE NÃO FOR SALVAR O BARCODE, RETIRAR ESSE TRECHO
+        # ean_number = barcode.get('ean13', code_id)
+        # barcodes_folder = Path(__file__).resolve().parent / "barcodes"
+        # ean_number.save(os.path.join(barcodes_folder, code_id))
         return code_id
 
-    def generate_sku(self):
-        """
-        Exemplo:
-        Genero: M
-        Categoria: CS
-        Subcategoria: ML
-        Tamanho: 004
-        Sequencias: 001
-        Ficando: MCSML004001
-
-        As sequências se iniciarão em 001 para cada tipo de produto de acordo com a categoria
-        """
-        pass
-
-    def atingiu_limite_min(self):
-        if self.total_pecas <= self.alerta_min:
-            self.limite_alerta_min = False
-        else:
-            self.limite_alerta_min = True
-
     def save(self, *args, **kwargs):
-        self.atingiu_limite_min()
-        tamanho = f"{self.tamanho}" if self.tamanho.isdigit() else f"{self.tamanho_codigo(self.tamanho)}"
-        if not self.ean:
-            self.ean = self.generate_barcode()
-
-        categoria_number = ''
-        sub_categoria_number = ''
-        if len(str(self.categoria_id)) < 2:
-            categoria_number = f"0{self.categoria_id}"
-        if len(str(self.subcategoria_id)) < 2:
-            sub_categoria_number = f"0{self.subcategoria_id}"
-        self.sku = f"{self.genero_id}{categoria_number}{sub_categoria_number}{tamanho}"
-
         motivo = self.motivo_alteracao_preco
 
+        tamanho_sku = f"{self.tamanho}{(2 - len(self.tamanho.tamanho))*'0'}"
+        self.limite_alerta_min = False if self.total_pecas <= self.alerta_min else True
         self.motivo_alteracao_preco = None
-        super().save(*args, **kwargs)
+        self.ean = self.generate_barcode() if not self.ean else self.ean
+        self.sku = f"{self.genero.genero[:1]}{self.categoria.codigo}{self.subcategoria.codigo}{tamanho_sku}"
+        super(Produto, self).save(*args, **kwargs)
 
         p = Produto.objects.filter(ean=self.ean).first()
         h = HistoricoAtualizacaoPrecos.objects.filter(ean=p).first()
@@ -295,7 +285,7 @@ class HistoricoVendas(models.Model):
     valor_compra = models.DecimalField(max_digits=6, decimal_places=2)
     vendedor = models.ForeignKey(Funcionario, on_delete=models.CASCADE, related_name='cargo_vendedor')
     caixa = models.ForeignKey(Funcionario, on_delete=models.CASCADE, related_name='cargo_caixa')
-    criado_por = models.ForeignKey(User, on_delete=models.CASCADE, related_name='vendas_criado_por', editable=False)
+    criado_por = models.ForeignKey(User, on_delete=models.CASCADE, related_name='hist_vendas_criado_por', editable=False)
     criado_em = models.DateTimeField(auto_now_add=True)
 
     class Meta:
