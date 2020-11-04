@@ -1,6 +1,7 @@
 import os
 from pathlib import Path
 
+from django.contrib.auth import get_user_model
 from django.db import models
 from django.contrib.auth.models import User, UserManager
 import barcode
@@ -113,17 +114,6 @@ class Categoria(models.Model):
 
     def __str__(self):
         return f'{self.categoria}'
-
-    def save(self, *args, **kwargs):
-        # //TODO FAZER FILTER
-        categorias = Categoria.objects.all()
-        for categoria in categorias:
-            if categoria.categoria == self.categoria:
-                self.sequencial = str(int(self.sequencial) + 1)
-                # //TODO FAZER MÁSCARA
-                n = 3 - len(self.sequencial)
-                self.sequencial = f"{n * '0'}{self.sequencial}"
-        super(Categoria, self).save(*args, **kwargs)
 
     class Meta:
         verbose_name = 'Categoria'
