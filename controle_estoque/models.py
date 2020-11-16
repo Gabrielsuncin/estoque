@@ -270,6 +270,13 @@ class HistoricoAtualizacaoPrecos(models.Model):
         db_table = 'historico_atualizacao_precos'
 
 
+# class Vendas(models.Model):
+#     # BARCODE, PRODUTO, PREÇO, QUANTIDADE, DESCONTO, SUBTOTAL, TOTAL, FORMA_PGTO
+#     barcode = models.ForeignKey(Produto, on_delete=models.PROTECT)
+#     produto = models.
+
+
+
 class HistoricoVendas(models.Model):
     itens_compra = models.JSONField(default=dict)
     status = models.CharField(max_length=30, choices=VENDAS_STATUS, default='Concluída')
@@ -291,5 +298,5 @@ class HistoricoVendas(models.Model):
 # //TODO VERIFICAR COMO COLOCAR O USUÁRIO NO CAMPO CRIADO_POR
 # //TODO NA TABELA PEDIDOS COLOCAR CAMPO AUTORIZADO PARA O ANALISTA
 # //TODO ACRESCENTAR CAMPO FORMA DE PAGTO EM VENDASHISTORY
-# //TODO EM VENDAS COLOCAR FORMA DE PAGTO, QUANTIDADE, SUBTOTAL, DESCONTO E TOTAL
+# //TODO EM VENDAS COLOCAR BARCODE, PRODUTO, PREÇO,	QUANTIDADE,	DESCONTO, SUBTOTAL,	TOTAL, FORMA_PGTO
 # //TODO FAZER FUNÇÃO DELETE PARA CRIAR LOG E ENVIAR EMAIL AOS ADMINS

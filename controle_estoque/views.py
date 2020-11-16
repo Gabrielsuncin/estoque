@@ -9,6 +9,7 @@ from django.shortcuts import render
 from random import randint
 import barcode
 
+from controle_estoque.models import Produto
 
 logger = logging.getLogger('file')
 
@@ -70,6 +71,12 @@ def send_email_logs(request):
     return HttpResponse('Email enviado com sucesso!')
 
 
+def vendas(request):
+    context = {
+        'produto': Produto.objects.get(ean=request.ean)
+        # 'produto': Produto.objects.all()
+    }
+    return render(request, 'vendas.html', context)
 
 
 # //TODO A VIEW DE VENDAS DEVERÁ RETORNAR O PRODUTO E O PREÇO DO DB QUANDO FOR INSERIDO O CÓDIGO DO MESMO

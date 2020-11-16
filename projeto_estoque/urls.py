@@ -19,7 +19,5 @@ from controle_estoque import urls as estoque_urls
 
 urlpatterns = [
     path('', include(estoque_urls)),
-    # path('jet/', include('jet.urls', 'jet')),
-    # path('jet/dashboard/', include('jet.dashboard.urls', 'jet-dashboard')),
     path('admin/', admin.site.urls),
 ]
