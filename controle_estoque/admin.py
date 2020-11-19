@@ -1,32 +1,26 @@
-import csv
-from datetime import datetime
-
-import xlwt
 from django.contrib import admin
 from django.http import HttpResponse
-
-from .models import Fornecedor, Funcionario, Genero, Categoria, Subcategoria, Produto, HistoricoVendas, \
-    HistoricoAtualizacaoPrecos, TamanhoProduto
+from datetime import datetime
+import csv
+import xlwt
+from .models import (Fornecedor, Funcionario, Genero, Categoria, Subcategoria, Produto, HistoricoVendas,
+                     HistoricoAtualizacaoPrecos, TamanhoProduto)
 
 
 def export_as_csv(self, request, queryset):
     meta = self.model._meta
     field_names = [field.name for field in meta.fields]
-
     response = HttpResponse(content_type='text/csv')
     response['Content-Disposition'] = f'attachment; filename={meta}.csv'
     writer = csv.writer(response)
     writer.writerow(field_names)
     for obj in queryset:
+        obj.criado_em = obj.criado_em.strftime("%Y-%m-%d %H:%M:%S")
         writer.writerow([getattr(obj, field) for field in field_names])
     return response
 
-export_as_csv.short_description = "Exportar dados em formato CSV"
-
 
 def export_xlsx(self, request, queryset):
-    # model = self.model._meta
-    # columns = self.list_display
     meta = self.model._meta
     field_names = [field.name for field in meta.fields]
     response = HttpResponse(content_type='application/ms-excel')
@@ -53,9 +47,6 @@ def export_xlsx(self, request, queryset):
 
     wb.save(response)
     return response
-
-
-export_xlsx.short_description = "Exportar dados em formato Excel"
 
 
 def salva_criado_por(request, obj):
@@ -120,8 +111,6 @@ class CategoriaAdmin(admin.ModelAdmin):
         salva_criado_por(request, obj)
 
 
-
-
 @admin.register(Subcategoria)
 class SubcategoriaAdmin(admin.ModelAdmin):
     list_display = ['id', 'subcategoria', 'codigo', 'criado_por', 'criado_em', 'atualizado_por', 'atualizado_em', ]
@@ -149,13 +138,16 @@ class TamanhoProdutoAdmin(admin.ModelAdmin):
 @admin.register(Produto)
 class ProdutoAdmin(admin.ModelAdmin):
     list_display = ['id', 'descricao', 'genero', 'categoria', 'subcategoria', 'tamanho', 'cor', 'grade',
-                    'min_pecas', 'alerta_min', 'limite_alerta_min', 'total_pecas', 'preco_compra', 'preco_venda', 'motivo_alteracao_preco', 'auto_pedido', 'ean',
+                    'min_pecas', 'alerta_min', 'limite_alerta_min', 'total_pecas', 'preco_compra', 'preco_venda',
+                    'motivo_alteracao_preco', 'auto_pedido', 'ean',
                     'sku', 'fornecedor', 'criado_por', 'criado_em', 'atualizado_por', 'atualizado_em', ]
     search_fields = ['id', 'descricao', 'genero', 'categoria', 'subcategoria', 'tamanho', 'cor', 'grade',
-                     'alerta_min', 'limite_alerta_min', 'motivo_alteracao_preco', 'auto_pedido', 'ean', 'sku', 'fornecedor', 'criado_por', 'criado_em',
+                     'alerta_min', 'limite_alerta_min', 'motivo_alteracao_preco', 'auto_pedido', 'ean', 'sku',
+                     'fornecedor', 'criado_por', 'criado_em',
                      'atualizado_por', 'atualizado_em', ]
     list_filter = ['descricao', 'genero', 'categoria', 'subcategoria', 'tamanho', 'cor', 'grade',
-                   'alerta_min', 'limite_alerta_min', 'motivo_alteracao_preco', 'auto_pedido', 'ean', 'sku', 'fornecedor', 'criado_por', 'criado_em',
+                   'alerta_min', 'limite_alerta_min', 'motivo_alteracao_preco', 'auto_pedido', 'ean', 'sku',
+                   'fornecedor', 'criado_por', 'criado_em',
                    'atualizado_por', 'atualizado_em', ]
 
     actions = (export_as_csv, export_xlsx)
@@ -167,11 +159,11 @@ class ProdutoAdmin(admin.ModelAdmin):
 @admin.register(HistoricoAtualizacaoPrecos)
 class HistoricoAtualizacaoPrecosAdmin(admin.ModelAdmin):
     list_display = ['id', 'ean', 'descricao', 'preco_compra', 'preco_venda', 'motivo_alteracao_preco', 'criado_por',
-                    'criado_em' ]
+                    'criado_em']
     search_fields = ['id', 'ean', 'descricao', 'preco_compra', 'preco_venda', 'motivo_alteracao_preco', 'criado_por',
-                    'criado_em', ]
+                     'criado_em', ]
     list_filter = ['ean', 'descricao', 'preco_compra', 'preco_venda', 'motivo_alteracao_preco', 'criado_por',
-                    'criado_em', ]
+                   'criado_em', ]
 
     actions = (export_as_csv, export_xlsx)
 
@@ -187,6 +179,9 @@ class HistoricoVendasAdmin(admin.ModelAdmin):
     def save_model(self, request, obj, form, change):
         salva_criado_por(request, obj)
 
+
+export_xlsx.short_description = "Exportar dados em formato Excel"
+export_as_csv.short_description = "Exportar dados em formato CSV"
 
 # //TODO SELECIONAR CAMPOS A SEREM MOSTRADOS NO FILTRO
 # //TODO REFATORAR SAVE_MODEL

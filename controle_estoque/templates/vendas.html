@@ -11,7 +11,9 @@
   {{ form.ean }}
 <button type="submit">Buscar</button>
   <div>
+    {% comment %}
     {{ produto.ean }} - {{ produto.descricao }} - {{ produto.preco_venda }}
+    {% endcomment %}
   </div>
 </form>
 </body>

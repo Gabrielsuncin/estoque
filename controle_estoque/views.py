@@ -73,7 +73,7 @@ def send_email_logs(request):
 
 def vendas(request):
     context = {
-        'produto': Produto.objects.get(ean=request.ean)
+        'produto': Produto.objects.all().first()
         # 'produto': Produto.objects.all()
     }
     return render(request, 'vendas.html', context)
