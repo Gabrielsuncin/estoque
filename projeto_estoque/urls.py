@@ -15,9 +15,15 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from controle_estoque import urls as estoque_urls
+# from controle_estoque import urls as estoque_urls
+from controle_estoque.urls import controle_estoque_urls
+from controle_estoque.views import principal, generate_barcode, send_email_logs
 
 urlpatterns = [
-    path('', include(estoque_urls)),
+    # path('', include(estoque_urls)),
     path('admin/', admin.site.urls),
+    path('', principal, name='principal'),
+    path('barcode/', generate_barcode, name='barcode'),
+    path('email/', send_email_logs, name='email'),
+    path('vendas/', include(controle_estoque_urls)),
 ]

@@ -1,15 +1,15 @@
 import logging
-import os
 from pathlib import Path
-
 from django.conf import settings
 from django.core import mail
 from django.http import HttpResponse
 from django.shortcuts import render
+from rest_framework import viewsets
+from controle_estoque.models import Produto
 from random import randint
 import barcode
 
-from controle_estoque.models import Produto
+from controle_estoque.serializers import VendasSerializer
 
 logger = logging.getLogger('file')
 
@@ -39,26 +39,6 @@ def send_email_logs(request):
 
     email_default = settings.DEFAULT_FROM_EMAIL
 
-    # with mail.get_connection() as connection:
-    #     mail.EmailMessage(
-    #         'Assunto',
-    #         'Mensagem de teste de envio de email do Django',
-    #         email_default,
-    #         [email_default],
-    #         connection=connection,
-    #         attachments=[filename, logfile.read(), 'text/']
-    #     ).send()
-
-    # with open(filename) as logfile:
-    #     mail = EmailMessage(
-    #         'Assunto',
-    #         'Mensagem de teste de envio de email do Django',
-    #         email_default,
-    #         [email_default])
-    #     mail.attach(filename, logfile.read(), 'text/plain')
-    #     mail.send()
-
-
     with open(filename) as logfile:
         mail.EmailMessage(
             'Novo log gerado',
@@ -71,12 +51,9 @@ def send_email_logs(request):
     return HttpResponse('Email enviado com sucesso!')
 
 
-def vendas(request):
-    context = {
-        'produto': Produto.objects.all().first()
-        # 'produto': Produto.objects.all()
-    }
-    return render(request, 'vendas.html', context)
+class VendasViewSet(viewsets.ModelViewSet):
+    queryset = Produto.objects.all()
+    serializer_class = VendasSerializer
 
 
 # //TODO A VIEW DE VENDAS DEVERÁ RETORNAR O PRODUTO E O PREÇO DO DB QUANDO FOR INSERIDO O CÓDIGO DO MESMO
