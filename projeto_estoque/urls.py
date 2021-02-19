@@ -15,9 +15,14 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from controle_estoque import urls as estoque_urls
+from interface import urls as interface_urls
+from django.conf import settings  # visualizar img
+from django.conf.urls.static import static  # visualizar img
 
 urlpatterns = [
-    path('', include(estoque_urls)),
+    path('', include(interface_urls)),
     path('admin/', admin.site.urls),
 ]
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -45,3 +45,4 @@ __pycache__/
 .env
 barcodes/
 *.svg
+controle_usuarios/media/
